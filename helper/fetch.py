@@ -19,7 +19,7 @@ from handler.logHandler import LogHandler
 from handler.proxyHandler import ProxyHandler
 from fetcher.proxyFetcher import ProxyFetcher
 from handler.configHandler import ConfigHandler
-
+from urllib.parse import urlparse
 
 class _ThreadFetcher(Thread):
 
@@ -41,8 +41,19 @@ class _ThreadFetcher(Thread):
                 if proxy in self.proxy_dict:
                     self.proxy_dict[proxy].add_source(self.fetch_source)
                 else:
-                    self.proxy_dict[proxy] = Proxy(
-                        proxy, source=self.fetch_source)
+                    # >>> urlparse('socks5://127.0.0.1:1080')
+                    # ParseResult(scheme='socks5', netloc='127.0.0.1:1080', path='', params='', query='', fragment='')
+                    # >>> urlparse('127.0.0.1:1080')
+                    # ParseResult(scheme='', netloc='', path='127.0.0.1:1080', params='', query='', fragment='')
+                    part = urlparse(proxy)
+                    if part.scheme != '':
+                        # 不会使用到key，不用修改
+                        self.proxy_dict[proxy] = Proxy(
+                            part.netloc, source=self.fetch_source, protocol=part.scheme)
+                    else:
+                        # 旧逻辑
+                        self.proxy_dict[proxy] = Proxy(
+                            proxy, source=self.fetch_source)
         except Exception as e:
             self.log.error("ProxyFetch - {func}: error".format(func=self.fetch_source))
             self.log.error(str(e))

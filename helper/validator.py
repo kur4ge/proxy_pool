@@ -32,6 +32,8 @@ class ProxyValidator(withMetaclass(Singleton)):
     pre_validator = []
     http_validator = []
     https_validator = []
+    socks5_http_validator = []
+    socks5_https_validator = []
 
     @classmethod
     def addPreValidator(cls, func):
@@ -46,6 +48,16 @@ class ProxyValidator(withMetaclass(Singleton)):
     @classmethod
     def addHttpsValidator(cls, func):
         cls.https_validator.append(func)
+        return func
+
+    @classmethod
+    def addSocks5HttpValidator(cls, func):
+        cls.socks5_http_validator.append(func)
+        return func
+
+    @classmethod
+    def addSocks5HttpsValidator(cls, func):
+        cls.socks5_https_validator.append(func)
         return func
 
 

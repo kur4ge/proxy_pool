@@ -39,8 +39,13 @@ class DoValidator(object):
         Returns:
             Proxy Object
         """
-        http_r = cls.httpValidator(proxy)
-        https_r = False if not http_r else cls.httpsValidator(proxy)
+        if proxy.protocol == 'socks5':
+            http_r = cls.socks5HttpValidator(proxy)
+            https_r = False if not http_r else cls.socks5HttpsValidator(proxy)
+        else:
+            # 旧逻辑
+            http_r = cls.httpValidator(proxy)
+            https_r = False if not http_r else cls.httpsValidator(proxy)
 
         proxy.check_count += 1
         proxy.last_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -68,6 +73,21 @@ class DoValidator(object):
             if not func(proxy.proxy):
                 return False
         return True
+
+    @classmethod
+    def socks5HttpValidator(cls, proxy):
+        for func in ProxyValidator.socks5_http_validator:
+            if not func(proxy.proxy):
+                return False
+        return True
+
+    @classmethod
+    def socks5HttpsValidator(cls, proxy):
+        for func in ProxyValidator.socks5_https_validator:
+            if not func(proxy.proxy):
+                return False
+        return True
+
 
     @classmethod
     def preValidator(cls, proxy):

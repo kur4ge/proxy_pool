@@ -18,7 +18,7 @@ import json
 class Proxy(object):
 
     def __init__(self, proxy, fail_count=0, region="", anonymous="",
-                 source="", check_count=0, last_status="", last_time="", https=False):
+                 source="", check_count=0, last_status="", last_time="", protocol='http', https=False):
         self._proxy = proxy
         self._fail_count = fail_count
         self._region = region
@@ -28,6 +28,7 @@ class Proxy(object):
         self._last_status = last_status
         self._last_time = last_time
         self._https = https
+        self._protocol = protocol
 
     @classmethod
     def createFromJson(cls, proxy_json):
@@ -89,6 +90,13 @@ class Proxy(object):
         return self._https
 
     @property
+    def protocol(self):
+        """ 协议，http/sock5 """
+        if self._protocol:
+            return self._protocol
+        return 'http'   # 默认 http
+
+    @property
     def to_dict(self):
         """ 属性字典 """
         return {"proxy": self.proxy,
@@ -99,7 +107,9 @@ class Proxy(object):
                 "source": self.source,
                 "check_count": self.check_count,
                 "last_status": self.last_status,
-                "last_time": self.last_time}
+                "last_time": self.last_time,
+                "protocol": self.protocol
+                }
 
     @property
     def to_json(self):
