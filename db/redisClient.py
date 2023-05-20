@@ -47,19 +47,18 @@ class RedisClient(object):
                                                                    socket_timeout=5,
                                                                    **kwargs))
 
-    def get(self, https):
+    def get(self, https, protocol=None):
         """
         返回一个代理
         :return:
         """
+        proxies = self.__conn.hvals(self.name)
+        if protocol:
+            proxies = list(filter(lambda x: json.loads(x).get("protocol") == protocol, proxies))
         if https:
-            items = self.__conn.hvals(self.name)
-            proxies = list(filter(lambda x: json.loads(x).get("https"), items))
-            return choice(proxies) if proxies else None
-        else:
-            proxies = self.__conn.hkeys(self.name)
-            proxy = choice(proxies) if proxies else None
-            return self.__conn.hget(self.name, proxy) if proxy else None
+            proxies = list(filter(lambda x: json.loads(x).get("https"), proxies))
+        return choice(proxies) if proxies else None
+
 
     def put(self, proxy_obj):
         """
@@ -70,12 +69,12 @@ class RedisClient(object):
         data = self.__conn.hset(self.name, proxy_obj.proxy, proxy_obj.to_json)
         return data
 
-    def pop(self, https):
+    def pop(self, https, protocol=None):
         """
         弹出一个代理
         :return: dict {proxy: value}
         """
-        proxy = self.get(https)
+        proxy = self.get(https, protocol)
         if proxy:
             self.__conn.hdel(self.name, json.loads(proxy).get("proxy", ""))
         return proxy if proxy else None
@@ -104,16 +103,17 @@ class RedisClient(object):
         """
         return self.__conn.hset(self.name, proxy_obj.proxy, proxy_obj.to_json)
 
-    def getAll(self, https):
+    def getAll(self, https, protocol=None):
         """
         字典形式返回所有代理, 使用changeTable指定hash name
         :return:
         """
-        items = self.__conn.hvals(self.name)
+        proxies = self.__conn.hvals(self.name)
         if https:
-            return list(filter(lambda x: json.loads(x).get("https"), items))
-        else:
-            return items
+            proxies = list(filter(lambda x: json.loads(x).get("https"), proxies))
+        if protocol:
+            proxies = list(filter(lambda x: json.loads(x).get("protocol") == protocol, proxies))
+        return proxies
 
     def clear(self):
         """

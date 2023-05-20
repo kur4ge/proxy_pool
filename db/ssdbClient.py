@@ -47,19 +47,19 @@ class SsdbClient(object):
                                                                    socket_timeout=5,
                                                                    **kwargs))
 
-    def get(self, https):
+    def get(self, https, protocol=None):
         """
         从hash中随机返回一个代理
         :return:
         """
+        items_dict = self.__conn.hgetall(self.name)
+        proxies = items_dict.values()
+
+        if protocol:
+            proxies = list(filter(lambda x: json.loads(x).get("protocol") == protocol, proxies))
         if https:
-            items_dict = self.__conn.hgetall(self.name)
-            proxies = list(filter(lambda x: json.loads(x).get("https"), items_dict.values()))
-            return choice(proxies) if proxies else None
-        else:
-            proxies = self.__conn.hkeys(self.name)
-            proxy = choice(proxies) if proxies else None
-            return self.__conn.hget(self.name, proxy) if proxy else None
+            proxies = list(filter(lambda x: json.loads(x).get("https"), proxies))
+        return choice(proxies) if proxies else None
 
     def put(self, proxy_obj):
         """
@@ -70,12 +70,12 @@ class SsdbClient(object):
         result = self.__conn.hset(self.name, proxy_obj.proxy, proxy_obj.to_json)
         return result
 
-    def pop(self, https):
+    def pop(self, https, protocol=None):
         """
         顺序弹出一个代理
         :return: proxy
         """
-        proxy = self.get(https)
+        proxy = self.get(https, protocol)
         if proxy:
             self.__conn.hdel(self.name, json.loads(proxy).get("proxy", ""))
         return proxy if proxy else None
@@ -104,16 +104,18 @@ class SsdbClient(object):
         """
         self.__conn.hset(self.name, proxy_obj.proxy, proxy_obj.to_json)
 
-    def getAll(self, https):
+    def getAll(self, https, protocol=None):
         """
         字典形式返回所有代理, 使用changeTable指定hash name
         :return:
         """
         item_dict = self.__conn.hgetall(self.name)
+        proxies = item_dict.values()
         if https:
-            return list(filter(lambda x: json.loads(x).get("https"), item_dict.values()))
-        else:
-            return item_dict.values()
+            proxies = list(filter(lambda x: json.loads(x).get("https"), proxies))
+        if protocol:
+            proxies = list(filter(lambda x: json.loads(x).get("protocol") == protocol, proxies))
+        return proxies
 
     def clear(self):
         """
