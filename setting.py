@@ -59,6 +59,7 @@ PROXY_FETCHER = [
     "wallProxy01",
     "wallProxy02",
     "wallProxy03",
+    "socks5Proxy01"
 ]
 
 # ############# proxy validator #################
