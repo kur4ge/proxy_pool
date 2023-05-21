@@ -41,7 +41,8 @@ class Proxy(object):
                    check_count=_dict.get("check_count", 0),
                    last_status=_dict.get("last_status", ""),
                    last_time=_dict.get("last_time", ""),
-                   https=_dict.get("https", False)
+                   https=_dict.get("https", False),
+                   protocol=_dict.get("protocol", "http"),
                    )
 
     @property
@@ -92,9 +93,7 @@ class Proxy(object):
     @property
     def protocol(self):
         """ 协议，http/sock5 """
-        if self._protocol:
-            return self._protocol
-        return 'http'   # 默认 http
+        return self._protocol
 
     @property
     def to_dict(self):
