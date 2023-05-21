@@ -56,9 +56,9 @@ PROXY_FETCHER = [
     "freeProxy09",
     "freeProxy10",
     "freeProxy11",
-    "wallProxy01",
-    "wallProxy02",
-    "wallProxy03",
+    # "wallProxy01",
+    # "wallProxy02",
+    # "wallProxy03",
     "socks5Proxy01"
 ]
 
