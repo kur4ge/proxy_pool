@@ -17,6 +17,7 @@ import json
 from time import sleep
 
 from util.webRequest import WebRequest
+from handler.configHandler import ConfigHandler
 
 
 class ProxyFetcher(object):
@@ -233,6 +234,26 @@ class ProxyFetcher(object):
             for proxy in proxies:
                 yield ':'.join(proxy)
 
+    @staticmethod
+    def socks5Proxy01():
+        conf = ConfigHandler()
+        if not( conf.fofa_email and conf.fofa_key ):  # 没配置key 跳过
+            print('Need Set FOFA_EMAIL and FOFA_KEY')
+            return
+        from urllib.parse import quote
+        from base64 import b64encode
+        from datetime import date, timedelta
+        after = (date.today() - timedelta(days=14)).strftime("%Y-%m-%d") # 14天前
+        query = f'protocol=="socks5" && "Version:5 Method:No Authentication(0x00)" && after="{after}" && country="CN"'
+        query_url = f'https://fofa.info/api/v1/search/all?email={conf.fofa_email}&key={conf.fofa_key}'
+        query_url += f'&qbase64={quote(b64encode(query.encode()).decode())}'
+        query_url += '&fields=ip,port'
+        request = WebRequest()
+        for page in range(1, 3):    # 获取前3页
+            url = f'{query_url}&page={page}&size=100'
+            r = request.get(url, timeout=10)
+            for proxy in r.json['results']:
+                yield 'socks5://' + ':'.join(proxy)
 
 if __name__ == '__main__':
     p = ProxyFetcher()

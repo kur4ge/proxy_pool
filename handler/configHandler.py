@@ -81,3 +81,10 @@ class ConfigHandler(withMetaclass(Singleton)):
     def timezone(self):
         return os.getenv("TIMEZONE", setting.TIMEZONE)
 
+    @LazyProperty
+    def fofa_email(self):
+        return os.getenv("FOFA_EMAIL", setting.FOFA_EMAIL)
+
+    @LazyProperty
+    def fofa_key(self):
+        return os.getenv("FOFA_KEY", setting.FOFA_KEY)

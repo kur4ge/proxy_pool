@@ -93,3 +93,8 @@ PROXY_REGION = True
 # Otherwise it will detect the timezone from the system automatically.
 
 TIMEZONE = "Asia/Shanghai"
+
+
+# FOFA 账号信息
+FOFA_EMAIL = ""
+FOFA_KEY = ""
