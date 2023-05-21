@@ -13,8 +13,6 @@
 __author__ = 'JHao'
 
 import re
-import socks
-import requests
 from requests import head
 from util.six import withMetaclass
 from util.singleton import Singleton
@@ -103,22 +101,11 @@ def customValidatorExample(proxy):
 @ProxyValidator.addSocks5HttpValidator
 def Socks5HttpTimeOutValidator(proxy):
     """ Socks5 http检测超时 """
+    proxies = {"http": "socks5://{proxy}".format(proxy=proxy), "https": "socks5://{proxy}".format(proxy=proxy)}
     try:
-        match = IP_REGEX.match(proxy)
-        if match:
-            proxy_host = match.group(2)
-            proxy_port = int(match.group(3))
-        else:
-            return False
-        socks.set_default_proxy(socks.SOCKS5, proxy_host, proxy_port)
-        socks.wrap_module(requests)
-        r = requests.head(conf.httpUrl, headers=HEADER, timeout=conf.verifyTimeout)
-        socks.set_default_proxy()
-        socks.wrap_module(requests)
+        r = head(conf.httpUrl, headers=HEADER, proxies=proxies, timeout=conf.verifyTimeout)
         return True if r.status_code == 200 else False
     except Exception as e:  # 恢复
-        socks.set_default_proxy()
-        socks.wrap_module(requests)
         return False
 
 
@@ -126,20 +113,10 @@ def Socks5HttpTimeOutValidator(proxy):
 def Socks5HttpsTimeOutValidator(proxy):
     """ Socks5 https检测超时 """
     # Match the IP address and port using the pattern
+    proxies = {"http": "socks5://{proxy}".format(proxy=proxy), "https": "socks5://{proxy}".format(proxy=proxy)}
     try:
-        match = IP_REGEX.match(proxy)
-        if match:
-            proxy_host = match.group(2)
-            proxy_port = int(match.group(3))
-        else:
-            return False
-        socks.set_default_proxy(socks.SOCKS5, proxy_host, proxy_port)
-        socks.wrap_module(requests)
-        r = requests.head(conf.httpsUrl, headers=HEADER, timeout=conf.verifyTimeout, verify=False)
-        socks.set_default_proxy()
-        socks.wrap_module(requests)
+        r = head(conf.httpsUrl, headers=HEADER, proxies=proxies, timeout=conf.verifyTimeout, verify=False)
         return True if r.status_code == 200 else False
-    except Exception as e:  # 恢复
-        socks.set_default_proxy()
-        socks.wrap_module(requests)
+    except Exception as e:
         return False
+
