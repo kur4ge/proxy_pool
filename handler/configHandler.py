@@ -59,7 +59,7 @@ class ConfigHandler(withMetaclass(Singleton)):
 
     @LazyProperty
     def ipHttpsUrl(self):
-        return os.getenv("IP_HTTPS_UR", setting.IP_HTTPS_UR)
+        return os.getenv("IP_HTTPS_URL", setting.IP_HTTPS_URL)
 
     @LazyProperty
     def verifyTimeout(self):
