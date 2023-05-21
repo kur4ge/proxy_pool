@@ -13,7 +13,7 @@
 __author__ = 'JHao'
 
 import re
-from requests import head
+from requests import head, get
 from util.six import withMetaclass
 from util.singleton import Singleton
 from handler.configHandler import ConfigHandler
@@ -105,7 +105,7 @@ def Socks5HttpTimeOutValidator(proxy):
     try:
         r = head(conf.httpUrl, headers=HEADER, proxies=proxies, timeout=conf.verifyTimeout)
         return True if r.status_code == 200 else False
-    except Exception as e:  # 恢复
+    except Exception as e:
         return False
 
 
@@ -120,3 +120,99 @@ def Socks5HttpsTimeOutValidator(proxy):
     except Exception as e:
         return False
 
+import os
+import socket
+
+@ProxyValidator.addHttpValidator
+def IPIncludeValidator(proxy):
+    """自定义validator函数，校验代理是否可用, 返回True/False"""
+    if conf.ipHttpUrl == '':    # 为空不校验
+        return True
+
+    proxies = {"http": "http://{proxy}".format(proxy=proxy), "https": "https://{proxy}".format(proxy=proxy)}
+    try:
+        r = get(conf.ipHttpUrl, headers=HEADER, proxies=proxies, timeout=conf.verifyTimeout, verify=False)
+        # 解析 ip, 如果包含满足返回
+        resp = r.text
+        if proxy.find('@') != -1:
+            addr = proxy.split('@')[1]
+        else:
+            addr = proxy
+        addr = addr.split(':')[0]
+        for item in socket.getaddrinfo(addr, None):
+            if resp.find(item[4][0]) != -1:
+                return True
+        return False
+    except Exception as e:
+        return False
+
+@ProxyValidator.addHttpsValidator
+def IPsIncludeValidator(proxy):
+    """自定义validator函数，校验代理是否可用, 返回True/False"""
+    if conf.ipHttpUrl == '':    # 为空不校验
+        return True
+
+    proxies = {"http": "http://{proxy}".format(proxy=proxy), "https": "https://{proxy}".format(proxy=proxy)}
+    try:
+        r = get(conf.ipHttpsUrl, headers=HEADER, proxies=proxies, timeout=conf.verifyTimeout, verify=False)
+        # 解析 ip, 如果有满足返回
+        resp = r.text
+        if proxy.find('@') != -1:
+            addr = proxy.split('@')[1]
+        else:
+            addr = proxy
+        addr = addr.split(':')[0]
+        for item in socket.getaddrinfo(addr, None):
+            if resp.find(item[4][0]) != -1:
+                return True
+        return False
+    except Exception as e:
+        return False
+
+
+@ProxyValidator.addSocks5HttpValidator
+def Socks5IPIncludeTimeOutValidator(proxy):
+    """ Socks5 http检测超时 """
+    if conf.ipHttpUrl == '':    # 为空不校验
+        return True
+
+    proxies = {"http": "socks5://{proxy}".format(proxy=proxy), "https": "socks5://{proxy}".format(proxy=proxy)}
+    try:
+        r = get(conf.ipHttpUrl, headers=HEADER, proxies=proxies, timeout=conf.verifyTimeout, verify=False)
+        # 解析 ip, 如果包含满足返回
+        resp = r.text
+        if proxy.find('@') != -1:
+            addr = proxy.split('@')[1]
+        else:
+            addr = proxy
+        addr = addr.split(':')[0]
+        for item in socket.getaddrinfo(addr, None):
+            if resp.find(item[4][0]) != -1:
+                return True
+        return False
+    except Exception as e:
+        return False
+
+
+@ProxyValidator.addSocks5HttpsValidator
+def Socks5IPsIncludeTimeOutValidator(proxy):
+    """ Socks5 https检测超时 """
+    if conf.ipHttpUrl == '':    # 为空不校验
+        return True
+
+    proxies = {"http": "socks5://{proxy}".format(proxy=proxy), "https": "socks5://{proxy}".format(proxy=proxy)}
+    try:
+        r = get(conf.ipHttpsUrl, headers=HEADER, proxies=proxies, timeout=conf.verifyTimeout, verify=False)
+        # 解析 ip, 如果有满足返回
+        resp = r.text
+        if proxy.find('@') != -1:
+            addr = proxy.split('@')[1]
+        else:
+            addr = proxy
+        addr = addr.split(':')[0]
+        for item in socket.getaddrinfo(addr, None):
+            if resp.find(item[4][0]) != -1:
+                return True
+        return False
+    except Exception as e:
+        return False

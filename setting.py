@@ -99,3 +99,7 @@ TIMEZONE = "Asia/Shanghai"
 # FOFA 账号信息
 FOFA_EMAIL = ""
 FOFA_KEY = ""
+
+# IP URL, 返回值需要包含当前IP
+IP_HTTP_URL = ""
+IP_HTTPS_UR = ""
