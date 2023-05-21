@@ -243,17 +243,20 @@ class ProxyFetcher(object):
         from urllib.parse import quote
         from base64 import b64encode
         from datetime import date, timedelta
-        after = (date.today() - timedelta(days=14)).strftime("%Y-%m-%d") # 14天前
+        import time
+        after = (date.today() - timedelta(days=30)).strftime("%Y-%m-%d") # 14天前
         query = f'protocol=="socks5" && "Version:5 Method:No Authentication(0x00)" && after="{after}" && country="CN"'
         query_url = f'https://fofa.info/api/v1/search/all?email={conf.fofa_email}&key={conf.fofa_key}'
         query_url += f'&qbase64={quote(b64encode(query.encode()).decode())}'
         query_url += '&fields=ip,port'
         request = WebRequest()
-        for page in range(1, 3):    # 获取前3页
+        for page in range(1, 4):    # 获取前5页
+            time.sleep(2)   # fofa 要求 2s 一次
             url = f'{query_url}&page={page}&size=100'
             r = request.get(url, timeout=10)
             for proxy in r.json['results']:
                 yield 'socks5://' + ':'.join(proxy)
+
 
 if __name__ == '__main__':
     p = ProxyFetcher()
