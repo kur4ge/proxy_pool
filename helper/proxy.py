@@ -136,6 +136,10 @@ class Proxy(object):
     def https(self, value):
         self._https = value
 
+    @protocol.setter
+    def protocol(self, value):
+        self._protocol = value
+
     @region.setter
     def region(self, value):
         self._region = value
